@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!--
+  // Copyright 2015 Mika "Fincodr" Luoma-aho
+  // Provided under the MIT license. See LICENSE file for details.
+  -->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Web Cryptography API test page</title>
+
+    <!-- Source Code Pro font -->
+    <link href="fonts/sourcesanspro.css" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Our styles -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="vendor/html5shiv/dist/html5shiv.min.js"></script>
+      <script src="vendor/respond/dest/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body role="document">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Web Cryptography API</a>
+        </div>
+
+        <!--<div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>-->
+      </div>
+    </nav>
+
+    <div class="container theme-webcrypto" role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action
+      <div class="jumbotron">
+        <h1>Web Cryptography API</h1>
+      </div
+      <div class="page-header">
+        <h1>Web Cryptography API <small>examples</small></h1>
+      </div>>-->
+
+      <div class="row">
+        <div class="col-md-12">
+          <h4>Dashboard</h4>
+        </div>
+      </div>
+
+      <!-- generateExportableKeysModal -->
+      <div class="modal fade" id="generateExportableKeysModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Enter name for the generated keys</h4>
+            </div>
+            <div class="modal-body">
+              <input type="text" class="form-control" placeholder="Name for generated (exportable) keys" id="inputExportableKeysName">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="btnGenerateExportableKeys" data-dismiss="modal">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- generatePrivateKeysModal -->
+      <div class="modal fade" id="generatePrivateKeysModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Enter name for the generated keys</h4>
+            </div>
+            <div class="modal-body">
+              <input type="text" class="form-control" placeholder="Name for generated private (non-exportable) keys" id="inputPrivateKeysName">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="btnGeneratePrivateKeys" data-dismiss="modal">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- generateSigningKeysModal -->
+      <div class="modal fade" id="generateSigningKeysModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Enter name for the generated signing keys</h4>
+            </div>
+            <div class="modal-body">
+              <input type="text" class="form-control" placeholder="Name for generated keys" id="inputSigningKeysName">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="btnGenerateSigningKeys" data-dismiss="modal">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="panel panel-warning">
+            <div class="panel-heading clearfix">
+              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Key storage</h4>
+              <div class="btn-group pull-right">
+                <a id="btnRemoveKey" class="btn btn-default btn-sm">Remove</a>
+                <a id="btnClearKeys" class="btn btn-default btn-sm">Clear</a>
+              </div>
+            </div>
+            <div class="panel-body panel-identities-body">
+              <div class="list-group" id="identities">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="panel panel-warning">
+            <div class="panel-heading clearfix">
+              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Note storage</h4>
+              <div class="btn-group pull-right">
+                <a id="btnRemoveNote" class="btn btn-default btn-sm">Remove</a>
+                <a id="btnClearNotes" class="btn btn-default btn-sm">Clear</a>
+              </div>
+            </div>
+            <div class="panel-body panel-notes-body">
+              <div class="list-group" id="notes">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="panel panel-success">
+            <div class="panel-heading clearfix">
+              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Input</h4>
+              <div class="btn-group pull-right">
+                <a id="btnDefaultInput" class="btn btn-default btn-sm">Default</a>
+                <a id="btnClearInput" class="btn btn-default btn-sm">Clear</a>
+              </div>
+            </div>
+            <div class="panel-body">
+              <form role="form">
+                <div class="form-group">
+                  <label for="name" class="sr-only">Input text</label>
+                  <textarea class="form-control textarea-input" rows="7" id="input"></textarea>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="panel panel-info">
+            <div class="panel-heading clearfix">
+              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Output</h4>
+              <div class="btn-group pull-right">
+                <a id="btnSwapOutputWithInput" class="btn btn-default btn-sm">Swap</a>
+                <a id="btnSaveOutput" class="btn btn-default btn-sm">Save</a>
+                <a id="btnClearOutput" class="btn btn-default btn-sm">Clear</a>
+              </div>
+            </div>
+            <div class="panel-body">
+              <form role="form">
+                <div class="form-group">
+                  <label for="name" class="sr-only">Output text</label>
+                  <textarea class="form-control textarea-output" rows="7" id="output"></textarea>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <h4>Actions</h4>
+          <p>
+            <div class="btn-group" role="group" aria-label="...">
+              <button type="button" class="btn btn-default" id="btnEncrypt">encrypt</button>
+              <button type="button" class="btn btn-default" id="btnDecrypt">decrypt</button>
+              <button type="button" class="btn btn-default" id="btnSign">sign</button>
+              <button type="button" class="btn btn-default" id="btnVerify">verify</button>
+              <button type="button" class="btn btn-default" id="btnDigest">digest</button>
+              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generateExportableKeysModal">generateExportableKeys</button>
+              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generatePrivateKeysModal">generatePrivateKeys</button>
+              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generateSigningKeysModal">generateSigningKeys</button>
+              <button type="button" class="btn btn-default" id="btnImportKey">importKey</button>
+              <button type="button" class="btn btn-default" id="btnExportKey">exportKey</button>
+              <!--<button type="button" class="btn btn-default">deriveKey</button>
+              <button type="button" class="btn btn-default">deriveBits</button>
+              <button type="button" class="btn btn-default">wrapKey</button>
+              <button type="button" class="btn btn-default">unwrapKey</button>-->
+            </div>
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <h4>Console</h4>
+          <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Debug output</h4>
+              <div class="btn-group pull-right">
+                <a id="btnClearDebug" class="btn btn-default btn-sm">Clear</a>
+              </div>
+            </div>
+            <div class="panel-body panel-debug-body" id="debug"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="vendor/jquery/dist/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- lodash -->
+    <script src="vendor/lodash/lodash.min.js"></script>
+    <!-- Include our modules -->
+    <script src="js/modules/crypto.js"></script>
+    <script src="js/modules/backend.js"></script>
+    <script src="js/modules/debug.js"></script>
+    <script src="js/modules/utils.js"></script>
+    <!-- Include our main script last -->
+    <script src="js/app.js"></script>
+  </body>
+</html>

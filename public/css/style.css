@@ -1,0 +1,54 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+  font-family: "Source Sans Pro","source-sans-pro","HelveticaNeue","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-webcrypto > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-webcrypto .navbar .container {
+  width: auto;
+}
+
+.theme-webcrypto .panel-debug-body {
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  margin: 0;
+  min-height: 350px;
+  max-height: 350px;
+  overflow-y: scroll;
+  font-size: 0.8em;
+  word-wrap: break-word;
+}
+
+.theme-webcrypto .panel-identities-body, .theme-webcrypto .panel-notes-body {
+  min-height: 200px;
+  max-height: 200px;
+  overflow-y: scroll;
+  word-wrap: break-word;
+}
+
+.theme-webcrypto .list-group-item-pre {
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  margin: 0;
+  font-size: 0.6em;
+}
+
+.theme-webcrypto .textarea-input, .theme-webcrypto .textarea-output {
+  resize: none;
+}
+
+.theme-webcrypto .panel-debug-body::before, .theme-webcrypto .panel-debug-body::after {
+  display: none;
+}
