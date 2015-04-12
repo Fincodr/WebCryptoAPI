@@ -14,9 +14,6 @@
     // Sane defaults (in 2015)
     var BITS = 2048;
 
-    // Prepare
-    var crypto = window.crypto || window.mozCrypto || window.webkitCrypto || window.msCrypto;
-
     var module = {
 
       checkSupport: function() {
@@ -27,9 +24,9 @@
 
       isSupported: function() {
         // check that we have crypto interface
-        if (crypto) {
+        if ("crypto" in window) {
           // check that we have subtleCryto interface
-          if ("subtle" in crypto) {
+          if ("subtle" in window.crypto) {
             // check that we can use RSA-OAEP algorithm with encrypt, decrypt, sign, digest, generateKey, exportKey
             var algo = ["RSA-OAEP"];
             var methods = ["encrypt", "decrypt", "sign", "digest", "generateKey", "exportKey"];

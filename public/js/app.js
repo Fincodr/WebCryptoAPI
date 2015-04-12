@@ -13,7 +13,7 @@
       // aliases
       var utils = app.utils;
       var debug = app.debug;
-      var crypto = app.crypto;
+      var cryptography = app.cryptography;
       var keyStorage = new app.Backend('PrivateNoteKeys', 'store', ['name', 'fingerprint'], 'name');
       var noteStorage = new app.Backend('PrivateNoteNotes', 'store', ['fingerprint', 'created'], 'created');
 
@@ -238,7 +238,7 @@
           module.refreshNotes();
 
           // Check Web Cryptography API support
-          if (crypto.isSupported()) {
+          if (cryptography.isSupported()) {
             debug.info('Web Cryptography API is supported');
           } else {
             debug.error('Web Cryptography API is NOT supported!');
@@ -248,7 +248,7 @@
         sign: function() {
           var data = $('#input').val();
           try {
-            var promise = crypto.subtle.sign({
+            var promise = window.crypto.subtle.sign({
                 name: "RSASSA-PKCS1-v1_5",
               },
               module.activeIdentity.private,
@@ -287,7 +287,7 @@
           }
           try {
             debug.info('<b>Verify</b><br/>Signature:<br/>' + utils.convertUint8ArrayToHexView(signatureFromBase64, 16) + '<br/>Data:<br/>' + utils.convertUint8ArrayToHexView(encryptedDataFromBase64, 16));
-            var promise = crypto.subtle.verify({
+            var promise = window.crypto.subtle.verify({
                 name: "RSASSA-PKCS1-v1_5"
               },
               module.activeIdentity.public,
@@ -312,7 +312,7 @@
         encrypt: function() {
           var data = $('#input').val();
           try {
-            var promise = crypto.subtle.encrypt({
+            var promise = window.crypto.subtle.encrypt({
                 name: "RSA-OAEP",
               },
               module.activeIdentity.public,
@@ -343,7 +343,7 @@
           var data = $('#input').val();
           var encryptedDataFromBase64 = utils.convertBase64ToUint8Array(data);
           try {
-            var promise = crypto.subtle.decrypt({
+            var promise = window.crypto.subtle.decrypt({
                 name: "RSA-OAEP"
               },
               module.activeIdentity.private,
