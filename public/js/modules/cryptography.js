@@ -7,7 +7,7 @@
   var app = parent.app = parent.app || {};
 
   // crypto module
-  app.crypto = (function(){
+  app.cryptography = (function(){
 
     var self = this;
 
