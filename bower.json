@@ -21,6 +21,10 @@
     "html5shiv": "~3.7.2",
     "bootstrap": "~3.3.2",
     "respond": "~1.4.2",
-    "lodash": "~3.6.0"
+    "lodash": "~3.6.0",
+    "font-awesome": "~4.3.0",
+    "moment": "~2.10.2",
+    "awesome-bootstrap-checkbox": "~0.3.4",
+    "bootstrap-select": "~1.6.4"
   }
 }

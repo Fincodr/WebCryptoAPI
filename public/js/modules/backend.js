@@ -40,15 +40,17 @@
     var self = this;
     // open the database
     return new Promise(function(resolve, reject){
-      var request = indexedDB.open(self.dbName, 1);
+      var request = indexedDB.open(self.dbName);
       request.onerror = function(event) {
         reject('Error: Database open failed.');
       };
       request.onsuccess = function(event) {
+        console.log('Backend.onsuccess');
         self.dbHandle = request.result;
         resolve(self.dbHandle);
       };
       request.onupgradeneeded = function(event) {
+        console.log('Backend.onupgradeneeded');
         self.dbHandle = request.result;
         if (!self.dbHandle.objectStoreNames.contains(self.dbObjectStoreName)) {
           var objectStore = self.dbHandle.createObjectStore(self.dbObjectStoreName, { autoIncrement: true, keyPath: self.dbKeyPath });
@@ -73,6 +75,38 @@
       var transaction = self.dbHandle.transaction([self.dbObjectStoreName], "readonly");
       var objectStore = transaction.objectStore(self.dbObjectStoreName);
       var request = objectStore.openCursor();
+      request.onsuccess = function(event) {
+        var cursor = event.target.result;
+        if (cursor) {
+          data.push(cursor.value);
+          cursor.continue();
+        } else {
+          resolve(data);
+        }
+      };
+      request.onerror = function(event) {
+        reject(event.target.error.message);
+      };
+    });
+  };
+
+  app.Backend.prototype.getAllDataByIndex = function(index, key) {
+    var self = this;
+    // get all data
+    return new Promise(function(resolve, reject){
+      if (!self.dbHandle) {
+        reject('Error: No database open.');
+      }
+      var data = [];
+      var transaction = self.dbHandle.transaction([self.dbObjectStoreName], "readonly");
+      var objectStore = transaction.objectStore(self.dbObjectStoreName);
+      var singleKeyRange;
+      try {
+        singleKeyRange = IDBKeyRange.only(new Array(key));
+      } catch (e) {
+        console.log('Exception:', e.toString());
+      }
+      var request = objectStore.index(index).openCursor(singleKeyRange);
       request.onsuccess = function(event) {
         var cursor = event.target.result;
         if (cursor) {

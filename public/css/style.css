@@ -10,15 +10,15 @@ body {
   margin-bottom: 20px;
 }
 
-.theme-webcrypto > p > .btn {
+.theme-notes > p > .btn {
   margin: 5px 0;
 }
 
-.theme-webcrypto .navbar .container {
+.theme-notes .navbar .container {
   width: auto;
 }
 
-.theme-webcrypto .panel-debug-body {
+.theme-notes .panel-debug-body {
   display: block;
   font-family: monospace;
   white-space: pre;
@@ -30,14 +30,14 @@ body {
   word-wrap: break-word;
 }
 
-.theme-webcrypto .panel-identities-body, .theme-webcrypto .panel-notes-body {
+.theme-notes .panel-identities-body, .theme-notes .panel-notes-body {
   min-height: 200px;
   max-height: 200px;
   overflow-y: scroll;
   word-wrap: break-word;
 }
 
-.theme-webcrypto .list-group-item-pre {
+.theme-notes .list-group-item-pre {
   display: block;
   font-family: monospace;
   white-space: pre;
@@ -45,10 +45,37 @@ body {
   font-size: 0.6em;
 }
 
-.theme-webcrypto .textarea-input, .theme-webcrypto .textarea-output {
+.theme-notes table .clickable-row {
+  cursor: pointer;
+}
+
+.theme-notes table .id {
+  font-size: 0.9em;
+  padding-top: 0.75em;
+  font-family: monospace;
+}
+
+.theme-notes .textarea {
   resize: none;
 }
 
-.theme-webcrypto .panel-debug-body::before, .theme-webcrypto .panel-debug-body::after {
+.theme-notes .textarea-input, .theme-notes .textarea-output {
+  resize: none;
+}
+
+.theme-notes .panel-debug-body::before, .theme-notes .panel-debug-body::after {
   display: none;
+}
+
+a:hover,
+a:focus,
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus {
+  outline:0 !important;
+  -webkit-appearance:none;
+  -moz-appearance:none;
 }

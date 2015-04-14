@@ -29,6 +29,18 @@
         return str;
       },
 
+      compareTwoUint8Arrays: function(a,b) {
+        if (a.length===b.length) {
+          for (var i=0, len=a.length; i!==len; ++i) {
+            if (a[i]!==b[i]) {
+              return false;
+            }
+          }
+          return true;
+        }
+        return false;
+      },
+
       convertTextToUint8Array: function(s) {
         var data = new Uint8Array(s.length);
         for (var i=0, len=s.length; i!==len; ++i) {

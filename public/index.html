@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Web Cryptography API test page</title>
+    <title>SecretNote</title>
 
     <!-- Source Code Pro font -->
     <link href="fonts/sourcesanspro.css" rel="stylesheet">
@@ -16,6 +16,11 @@
     <!-- Bootstrap -->
     <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="vendor/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <link href="vendor/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" >
 
     <!-- Our styles -->
     <link href="css/style.css" rel="stylesheet">
@@ -31,6 +36,151 @@
 
   <body role="document">
 
+    <!-- Modals -->
+
+    <!-- decryptNote -->
+    <div class="modal fade theme-notes" id="modalDecryptNote" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><i class="fa fa-envelope fa-2x"></i> Decrypted note</h4>
+          </div>
+          <div class="modal-body">
+            <form role="form">
+              <div class="form-group">
+                <label for="exampleInputText">Note contents:</label>
+                <textarea type="text" rows="7" class="form-control textarea" id="outputNote" placeholder="contents"></textarea>
+              </div>
+            </form>
+            <div class="alert alert-danger">
+                <p><i class="glyphicon glyphicon-alert"></i> <b>Warning:</b> This note is not <b>digitally signed</b>. Senders identity is not known.</p>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- createNote -->
+    <div class="modal fade theme-notes" id="modalCreateNote" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><i class="fa fa-envelope fa-2x"></i> Create note</h4>
+          </div>
+          <div class="modal-body">
+
+            <form role="form">
+
+              <div class="form-group">
+                <label for="inputName">Recipient identity:</label>
+                <select class="selectpicker" data-width="auto" data-live-search="true" data-show-subtext="true">
+                  <option data-subtext="00:12:34:55:66:9a:ca:fe:24:44:00:12:34:55:66:9a:ca:fe:24:44">Mustard</option>
+                  <option data-subtext="43:11:53:57:96:fa:ca:fe:24:44:00:12:34:55:66:9a:ca:fe:24:44">Ketchup</option>
+                  <option data-subtext="69:12:22:ee:e6:aa:ca:fe:24:44:00:12:34:55:66:9a:ca:fe:24:44">Relish</option>
+                </select>
+                <p class="help-block">Please note that only the selected recipient identity can read the note, provided that the recipient have the private-key for the identity.</p>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputText">Note contents:</label>
+                <textarea type="text" rows="7" class="form-control textarea" id="inputNote" placeholder="contents"></textarea>
+              </div>
+              <div class="alert alert-success">
+                <p><i class="glyphicon glyphicon-info"></i> If you digitally sign the note, the recipient can verify that your identity was used to sign the note. Please note that it also means that the note is not anonymous anymore since the recipient knows who sent the note. As a bonus the recipient also receives your public-key so that the recipient can reply to your note.</p>
+                <div class="checkbox">
+                  <input type="checkbox" id="checkboxDigitallySign">
+                  <label for="checkboxDigitallySign">Digitally sign</label>
+                </div>
+              </div>
+            </form>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnCreateNote">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- generateIdentity -->
+    <div class="modal fade theme-notes" id="modalGenerateIdentity" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><i class="fa fa-key fa-2x"></i> Create identity</h4>
+          </div>
+          <div class="modal-body">
+
+            <form role="form">
+
+              <div role="tabpanel">
+                <!-- Nav tabs -->
+                <!--
+                <ul class="nav nav-tabs" role="tablist">
+                  <li role="presentation" class="active"><a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a></li>
+                  <li role="presentation"><a href="#import" aria-controls="profile" role="tab" data-toggle="tab">Import</a></li>
+                </ul>
+                -->
+                <p>
+                  Creating an <b>identity</b> allows you to store secret messages that only can read.<!--share your public identity and receive messages that only you can read. Not even the sender can read the message after they have been sent.-->
+                </p>
+                <!-- Tab panes -->
+                <div class="form-group">
+                  <label for="inputName">Anonymous name</label>
+                  <input type="text" class="form-control" id="inputName" placeholder="Enter name">
+                  <p class="help-block">Please note that you never should disclose anything personal like your real name or email here.</p>
+                </div>
+
+                <div class="alert alert-success"><i class="glyphicon glyphicon-info-sign"></i> Your identity has public and private keys. You can safely share your public-key to anybody but you must keep the private key secret to protect your identity.<!--You and your friends should always verify the identity fingerprint over the phone or by meeting before trusting the identity.--></div>
+
+                <div class="tab-content">
+                  <div role="tabpanel" class="tab-pane active" id="create">
+                  </div>
+                  <div role="tabpanel" class="tab-pane hidden" id="import">
+                    <div class="form-group textarea">
+                      <label for="exampleInputEmail1">Public Key</label>
+                      <textarea type="text" rows="7" class="form-control textarea" id="inputPublicKey" placeholder="Paste your public-key here"></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="exampleInputPassword1">Private Key (Optional)</label>
+                      <textarea type="text" rows="7" class="form-control textarea" id="inputPrivateKey" placeholder="(Optional) Paste your private-key here"></textarea>
+                      <p class="help-block">If you provide private-key, you can also receive messages using this identity.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form: Common settings -->
+              <!--<div class="checkbox disabled">
+                <label>
+                  <input type="checkbox" id="checkboxPublic" disabled> <del>This is public profile (share your anonymous name and your public key to others)</del>
+                </label>
+              </div>-->
+
+              <div class="alert alert-danger">
+                <p><i class="glyphicon glyphicon-alert"></i> If you make this identity exportable, you can share it (manually) with your other computer or device.</p>
+                <div class="checkbox checkbox-danger">
+                <input type="checkbox" id="checkboxExportable">
+                <label for="checkboxExportable">Make this identity exportable</label>
+              </div>
+              </div>
+            </form>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnGenerateKeys">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
@@ -41,83 +191,244 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Web Cryptography API</a>
+          <a class="navbar-brand" href="#">SecretNotes</a>
         </div>
-
-        <!--<div id="navbar" class="navbar-collapse collapse">
+        <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Nav header</li>
-                <li><a href="#">Separated link</a></li>
-                <li><a href="#">One more separated link</a></li>
-              </ul>
-            </li>
+            <li class="active"><a href="#notes" role="tab" data-toggle="tab">Notes</a></li>
+            <li><a href="#identities" role="tab" data-toggle="tab">Identities</a></li>
+            <li><a href="#about" role="tab" data-toggle="tab">About</a></li>
+            <li><a href="#debug" role="tab" data-toggle="tab"><i class="fa fa-bug"></i></a></li>
           </ul>
-        </div>-->
+        </div>
       </div>
     </nav>
 
-    <div class="container theme-webcrypto" role="main">
+    <div class="container theme-notes" role="main">
 
-      <!-- Main jumbotron for a primary marketing message or call to action
-      <div class="jumbotron">
-        <h1>Web Cryptography API</h1>
-      </div
-      <div class="page-header">
-        <h1>Web Cryptography API <small>examples</small></h1>
-      </div>>-->
-
-      <div class="row">
-        <div class="col-md-12">
-          <h4>Dashboard</h4>
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane fade in active" id="notes">
+          <div class="jumbotron hidden" id="notifyCreateIdentity">
+            <h1>Secret Notes</h1>
+            <p>Welcome! Please create new identity to start using Secret Notes!</p>
+            <p><a class="btn btn-primary btn-lg" href="#" role="button" id="btnConfigureKeys" data-toggle="modal" data-target="#modalGenerateIdentity">Create identity</a></p>
+          </div>
+          <div class="jumbotron hidden" id="notifySelectIdentity">
+            <h1>Secret Notes</h1>
+            <p>Welcome! Please select your identity to start using Secret Notes!</p>
+            <p><a class="btn btn-primary btn-lg" href="#identities" role="button" id="btnSelectKeys">Select identity</a></p>
+          </div>
+          <div id="notesSection" class="hidden">
+            <div class="page-header">
+              <h2>Notes</h2>
+              <p><a class="btn btn-default" href="#" role="button" id="btnCreateNote" data-toggle="modal" data-target="#modalCreateNote">Create new note</a></p>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <caption>List of messages that only you can read with your private key.</caption>
+                <thead>
+                  <tr>
+                    <th>Created</th>
+                    <th>Expires</th>
+                    <th>ID</th>
+                    <th>Status</td>
+                  </tr>
+                </thead>
+                <tbody id="notesTableBody">
+                </tbody>
+              </table>
+            </div>
+            <p>
+              <div id="notesTableFooter"></div>
+            </p>
+          </div>
         </div>
-      </div>
+        <div role="tabpanel" class="tab-pane fade" id="identities">
+          <div class="page-header">
+            <h2>Local identities</h2>
+            <p>
+              <a class="btn btn-default" href="#" role="button" id="btnConfigureKeys" data-toggle="modal" data-target="#modalGenerateIdentity">Create identity</a>
+            </p>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Fingerprint</th>
+                  <th>Usage</td>
+                  <th>Operations</td>
+                </tr>
+              </thead>
+              <tbody id="privateKeysTableBody">
+              </tbody>
+            </table>
+          </div>
+          <!--
+          <div class="page-header">
+            <h2>Public identities</h2>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Fingerprint</th>
+                    <th>Functions</td>
+                  </tr>
+                </thead>
+                <tbody id="publicKeysTableBody">
+                </tbody>
+              </table>
+            </div>
+          </div>-->
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="about">
+          <div class="page-header">
+            <h2>About</h2>
+          </div>
+          <div class="page-header">
+            <h2>Help</h2>
+          </div>
+          <div class="page-header">
+            <h2>MIT License</h2>
+            <pre>The MIT License (MIT)
 
-      <!-- generateExportableKeysModal -->
-      <div class="modal fade" id="generateExportableKeysModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title" id="myModalLabel">Enter name for the generated keys</h4>
+Copyright (c) 2015 Mika "Fincodr" Luoma-aho
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+          </div>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="debug">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="panel panel-warning">
+                <div class="panel-heading clearfix">
+                  <h4 class="panel-title pull-left" style="padding-top: 7.5px">Key storage</h4>
+                  <div class="btn-group pull-right">
+                    <a id="btnRemoveKey" class="btn btn-default btn-sm">Remove</a>
+                    <a id="btnClearKeys" class="btn btn-default btn-sm">Clear</a>
+                  </div>
+                </div>
+                <div class="panel-body panel-identities-body">
+                  <div class="list-group" id="debugIdentities">
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="modal-body">
-              <input type="text" class="form-control" placeholder="Name for generated (exportable) keys" id="inputExportableKeysName">
+            <div class="col-md-6">
+              <div class="panel panel-warning">
+                <div class="panel-heading clearfix">
+                  <h4 class="panel-title pull-left" style="padding-top: 7.5px">Note storage</h4>
+                  <div class="btn-group pull-right">
+                    <a id="btnRemoveNote" class="btn btn-default btn-sm">Remove</a>
+                    <a id="btnClearNotes" class="btn btn-default btn-sm">Clear</a>
+                  </div>
+                </div>
+                <div class="panel-body panel-notes-body">
+                  <div class="list-group" id="debugNotes">
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="btnGenerateExportableKeys" data-dismiss="modal">Save changes</button>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="panel panel-success">
+                <div class="panel-heading clearfix">
+                  <h4 class="panel-title pull-left" style="padding-top: 7.5px">Input</h4>
+                  <div class="btn-group pull-right">
+                    <a id="btnDefaultInput" class="btn btn-default btn-sm">Default</a>
+                    <a id="btnClearInput" class="btn btn-default btn-sm">Clear</a>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <form role="form">
+                    <div class="form-group">
+                      <label for="name" class="sr-only">Input text</label>
+                      <textarea class="form-control textarea-input" rows="7" id="input"></textarea>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="panel panel-info">
+                <div class="panel-heading clearfix">
+                  <h4 class="panel-title pull-left" style="padding-top: 7.5px">Output</h4>
+                  <div class="btn-group pull-right">
+                    <a id="btnSwapOutputWithInput" class="btn btn-default btn-sm">Swap</a>
+                    <a id="btnSaveOutput" class="btn btn-default btn-sm">Save</a>
+                    <a id="btnClearOutput" class="btn btn-default btn-sm">Clear</a>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <form role="form">
+                    <div class="form-group">
+                      <label for="name" class="sr-only">Output text</label>
+                      <textarea class="form-control textarea-output" rows="7" id="output"></textarea>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <h4>Actions</h4>
+              <p>
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default" id="btnEncrypt">encrypt</button>
+                  <button type="button" class="btn btn-default" id="btnDecrypt">decrypt</button>
+                  <button type="button" class="btn btn-default" id="btnSign">sign</button>
+                  <button type="button" class="btn btn-default" id="btnVerify">verify</button>
+                  <button type="button" class="btn btn-default" id="btnDigest">digest</button>
+                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalGenerateIdentity">generateKeys</button>
+                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generateSigningKeysModal">generateSigningKeys</button>
+                  <button type="button" class="btn btn-default" id="btnImportKey">importKey</button>
+                  <button type="button" class="btn btn-default" id="btnExportKey">exportKey</button>
+                  <!--<button type="button" class="btn btn-default">deriveKey</button>
+                  <button type="button" class="btn btn-default">deriveBits</button>
+                  <button type="button" class="btn btn-default">wrapKey</button>
+                  <button type="button" class="btn btn-default">unwrapKey</button>-->
+                </div>
+              </p>
+            </div>
+          </div>
+
+          <div class="row">
+            <br />
+            <div class="col-md-12">
+              <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                  <h4 class="panel-title pull-left" style="padding-top: 7.5px">Console</h4>
+                  <div class="btn-group pull-right">
+                    <a id="btnClearDebug" class="btn btn-default btn-sm">Clear</a>
+                  </div>
+                </div>
+                <div class="panel-body panel-debug-body" id="console"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- generatePrivateKeysModal -->
-      <div class="modal fade" id="generatePrivateKeysModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title" id="myModalLabel">Enter name for the generated keys</h4>
-            </div>
-            <div class="modal-body">
-              <input type="text" class="form-control" placeholder="Name for generated private (non-exportable) keys" id="inputPrivateKeysName">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="btnGeneratePrivateKeys" data-dismiss="modal">Save changes</button>
-            </div>
-          </div>
-        </div>
-      </div>
+
       <!-- generateSigningKeysModal -->
       <div class="modal fade" id="generateSigningKeysModal" tabindex="-1" role="dialog">
         <div class="modal-dialog">
@@ -137,126 +448,15 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-md-6">
-          <div class="panel panel-warning">
-            <div class="panel-heading clearfix">
-              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Key storage</h4>
-              <div class="btn-group pull-right">
-                <a id="btnRemoveKey" class="btn btn-default btn-sm">Remove</a>
-                <a id="btnClearKeys" class="btn btn-default btn-sm">Clear</a>
-              </div>
-            </div>
-            <div class="panel-body panel-identities-body">
-              <div class="list-group" id="identities">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="panel panel-warning">
-            <div class="panel-heading clearfix">
-              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Note storage</h4>
-              <div class="btn-group pull-right">
-                <a id="btnRemoveNote" class="btn btn-default btn-sm">Remove</a>
-                <a id="btnClearNotes" class="btn btn-default btn-sm">Clear</a>
-              </div>
-            </div>
-            <div class="panel-body panel-notes-body">
-              <div class="list-group" id="notes">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <div class="panel panel-success">
-            <div class="panel-heading clearfix">
-              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Input</h4>
-              <div class="btn-group pull-right">
-                <a id="btnDefaultInput" class="btn btn-default btn-sm">Default</a>
-                <a id="btnClearInput" class="btn btn-default btn-sm">Clear</a>
-              </div>
-            </div>
-            <div class="panel-body">
-              <form role="form">
-                <div class="form-group">
-                  <label for="name" class="sr-only">Input text</label>
-                  <textarea class="form-control textarea-input" rows="7" id="input"></textarea>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="panel panel-info">
-            <div class="panel-heading clearfix">
-              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Output</h4>
-              <div class="btn-group pull-right">
-                <a id="btnSwapOutputWithInput" class="btn btn-default btn-sm">Swap</a>
-                <a id="btnSaveOutput" class="btn btn-default btn-sm">Save</a>
-                <a id="btnClearOutput" class="btn btn-default btn-sm">Clear</a>
-              </div>
-            </div>
-            <div class="panel-body">
-              <form role="form">
-                <div class="form-group">
-                  <label for="name" class="sr-only">Output text</label>
-                  <textarea class="form-control textarea-output" rows="7" id="output"></textarea>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-12">
-          <h4>Actions</h4>
-          <p>
-            <div class="btn-group" role="group" aria-label="...">
-              <button type="button" class="btn btn-default" id="btnEncrypt">encrypt</button>
-              <button type="button" class="btn btn-default" id="btnDecrypt">decrypt</button>
-              <button type="button" class="btn btn-default" id="btnSign">sign</button>
-              <button type="button" class="btn btn-default" id="btnVerify">verify</button>
-              <button type="button" class="btn btn-default" id="btnDigest">digest</button>
-              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generateExportableKeysModal">generateExportableKeys</button>
-              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generatePrivateKeysModal">generatePrivateKeys</button>
-              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generateSigningKeysModal">generateSigningKeys</button>
-              <button type="button" class="btn btn-default" id="btnImportKey">importKey</button>
-              <button type="button" class="btn btn-default" id="btnExportKey">exportKey</button>
-              <!--<button type="button" class="btn btn-default">deriveKey</button>
-              <button type="button" class="btn btn-default">deriveBits</button>
-              <button type="button" class="btn btn-default">wrapKey</button>
-              <button type="button" class="btn btn-default">unwrapKey</button>-->
-            </div>
-          </p>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-12">
-          <h4>Console</h4>
-          <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-              <h4 class="panel-title pull-left" style="padding-top: 7.5px">Debug output</h4>
-              <div class="btn-group pull-right">
-                <a id="btnClearDebug" class="btn btn-default btn-sm">Clear</a>
-              </div>
-            </div>
-            <div class="panel-body panel-debug-body" id="debug"></div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="vendor/jquery/dist/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+    <!-- moment -->
+    <script src="vendor/moment/min/moment.min.js"></script>
     <!-- lodash -->
     <script src="vendor/lodash/lodash.min.js"></script>
     <!-- Include our modules -->

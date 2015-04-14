@@ -9,20 +9,25 @@
     // The main application module
     var app = parent.app = parent.app || {};
 
-    app = (function(){
-      // aliases
-      var utils = app.utils;
-      var debug = app.debug;
-      var cryptography = app.cryptography;
-      var keyStorage = new app.Backend('PrivateNoteKeys', 'store', ['name', 'fingerprint'], 'name');
-      var noteStorage = new app.Backend('PrivateNoteNotes', 'store', ['fingerprint', 'created'], 'created');
+    // aliases
+    var treo = window.treo;
+    var promise = window.treoPromise;
+    var websql = window.treoWebsql;
+    var utils = app.utils;
+    var debug = app.debug;
+    var cryptography = app.cryptography;
+    var keyStorage = new app.Backend('PrivateKeys', 'store', ['name', 'fingerprint'], 'name');
+    var noteStorage = new app.Backend('PrivateNotes', 'store', ['fingerprint', 'created', 'id'], 'created');
 
-      // test data
-      var Message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    // test data
+    var Message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+
+    app = (function(){
 
       // define module
       var module = {
-        activeIndentity: null,
+        identitiesCount: 0,
+        activeIdentity: null,
         activeNote: null,
 
         init: function() {
@@ -46,23 +51,46 @@
 
         setActiveIdentity: function(obj) {
           module.activeIdentity = obj;
+          module.refreshNotes();
           module.decrypt();
+          if (module.identitiesCount!==0) {
+            // Check if we have any identity selected
+            if (module.activeIdentity) {
+              $('#notifySelectIdentity').addClass('hidden');
+              $('#notesSection').removeClass('hidden');
+            } else {
+              $('#notifySelectIdentity').removeClass('hidden');
+              $('#notesSection').addClass('hidden');
+            }
+          } else {
+            $('#notifySelectIdentity').addClass('hidden');
+            $('#notesSection').removeClass('hidden');
+          }
         },
 
         setActiveNote: function(obj) {
           module.activeNote = obj;
           $('#input').val(obj.data);
-          module.decrypt();
+          module.decrypt().then(function(){
+            var output = $('#output').val();
+            $('#outputNote').val(output);
+          });
         },
 
         saveNote: function() {
           // Save note to noteStorage
           var $note = $('#output');
           var data = $note.val();
-          // Save one key to keyStorage
+          // Save one note to noteStorage
+          var now = moment();
+          var expires = moment(now).add(1, 'days');
+          var noteId = new Uint8Array(20);
+          window.crypto.getRandomValues(noteId);
           noteStorage.saveData({
-            created: new Date().toISOString(),
+            created: now.toISOString(),
+            expires: expires.toISOString(),
             fingerprint: module.activeIdentity.fingerprint,
+            id: noteId,
             data: data
           }).then(function(){
             module.refreshNotes();
@@ -72,22 +100,60 @@
         },
 
         refreshNotes: function() {
-          // Load noteStorage information
-          var $notes = $('#notes');
-          noteStorage.getAllData(module.activeIdentity).then(function(data){
-            $notes.empty();
-            _.forEach(data, function(keyObject){
+          // Update notes view (notes for active identity)
+          var $notes = $('#notesTableBody');
+          $notes.empty();
+          var $notesFooter = $('#notesTableFooter');
+          $notesFooter.empty();
+          var notesCount = 0;
+          if (module.activeIdentity) {
+            noteStorage.getAllData().then(function(data){
+              _.forEach(data, function(obj){
+                if (utils.compareTwoUint8Arrays(module.activeIdentity.fingerprint, obj.fingerprint)) {
+                  notesCount++;
+                  var created = moment(obj.created);
+                  var expires = moment(obj.expires);
+                  var diff = expires.diff(created, 'hours');
+                  var $el = $('<tr class="clickable-row">' +
+                    '<td>' + created.toISOString() + '</td>' +
+                    '<td>in ' + diff + ' hour(s)</td>' +
+                    '<td class="id">' + utils.convertUint8ArrayToHex(obj.id, ':') + '</td>' +
+                    '<td><span class="label label-danger">not signed</span></td>' +
+                  '</tr>');
+                  $notes.append($el);
+                  $el.click(function(){
+                    // set active
+                    $notes.find('tr').removeClass('info');
+                    $el.addClass('info');
+                    module.setActiveNote(obj);
+                    $('#modalDecryptNote').modal('show');
+                  });
+                }
+              });
+              $notesFooter.html('Total of ' + notesCount + ' note(s)');
+            }).catch(function(err){
+              console.log(err);
+            });
+          }
+
+          // Update debug view (all notes)
+          var $debugNotes = $('#debugNotes');
+          noteStorage.getAllData().then(function(data){
+            $debugNotes.empty();
+            _.forEach(data, function(obj){
+              // Append debug
               var $el = $('<a href="#" class="list-group-item">' +
-                  '<div class="list-group-item-pre">' + utils.convertUint8ArrayToHex(keyObject.fingerprint, ':') + '</div>' +
-                  '<div class="list-group-item-pre">' + keyObject.created +
-                  '</div>' +
+                  'ID: <div class="list-group-item-pre">' + utils.convertUint8ArrayToHex(obj.id, ':') + '</div>' +
+                  'PublicKey fingerprint: <div class="list-group-item-pre">' + utils.convertUint8ArrayToHex(obj.fingerprint, ':') + '</div>' +
+                  'Created: <div class="list-group-item-pre">' + obj.created + '</div>' +
+                  'Expires: <div class="list-group-item-pre">' + obj.expires + '</div>' +
                 '</a>');
-              $notes.append($el);
+              $debugNotes.append($el);
               $el.click(function(){
                 // set active
-                $notes.find('a').removeClass('active');
+                $debugNotes.find('a').removeClass('active');
                 $el.addClass('active');
-                module.setActiveNote(keyObject);
+                module.setActiveNote(obj);
               });
             });
           }).catch(function(err){
@@ -97,17 +163,25 @@
 
         refreshIdentities: function() {
           // Load keyStorage information
-          var $identities = $('#identities');
+          module.identitiesCount = 0;
+          var $debugIdentities = $('#debugIdentities');
+          var $privateIdentities = $('#privateKeysTableBody');
           keyStorage.getAllData().then(function(data){
-            $identities.empty();
-            _.forEach(data, function(keyObject){
-              var $el;
+            $debugIdentities.empty();
+            $privateIdentities.empty();
+            module.identitiesCount = data.length;
+            if (module.identitiesCount!==0) {
+              $('#notifyCreateIdentity').addClass('hidden');
+            } else {
+              $('#notifyCreateIdentity').removeClass('hidden');
+            }
+            _.forEach(data, function(obj){
               var usages = [];
-              if (keyObject.public) {
-                usages = _.union(usages, keyObject.public.usages);
+              if (obj.public) {
+                usages = _.union(usages, obj.public.usages);
               }
-              if (keyObject.private) {
-                usages = _.union(usages, keyObject.private.usages);
+              if (obj.private) {
+                usages = _.union(usages, obj.private.usages);
               }
               var usageLabels = '';
               var types = {
@@ -120,20 +194,47 @@
                 var type = types[usage] || 'default';
                 usageLabels += ' <span class="label label-' + type + '">' + usage + '</span>';
               });
-              $el = $('<a href="#" class="list-group-item">' +
-                '<h4 class="list-group-item-heading">' + keyObject.name + '</h4>' +
-                '<div class="list-group-item-pre">' + utils.convertUint8ArrayToHex(keyObject.fingerprint, ':') +
+
+              // append identities (private and public)
+              var $el1 = $('<tr class="clickable-row">' +
+                '<td>' + obj.name + '</td>' +
+                '<td class="id">' + utils.convertUint8ArrayToHex(obj.fingerprint, ':') + '</td>' +
+                '<td>' + usageLabels + '</td>' +
+                '<td class="pull-center"><a data-action="delete" href="#"><i class="glyphicon glyphicon-trash"></i>' +
+              '</tr>');
+              $privateIdentities.append($el1);
+              $el1.click(function(e){
+                if ($(e.target).parent().data('action') == 'delete') {
+                  // delete
+                  keyStorage.deleteFirst(obj.name).then(function(){
+                    module.refreshIdentities();
+                  });
+                  e.preventDefault();
+                } else {
+                  // set active
+                  $privateIdentities.find('tr').removeClass('info');
+                  $el1.addClass('info');
+                  module.setActiveIdentity(obj);
+                  $('#navbar a[href="#notes"]').tab('show');
+                }
+              });
+
+              // append debug
+              var $el2 = $('<a href="#" class="list-group-item">' +
+                '<h4 class="list-group-item-heading">' + obj.name + '</h4>' +
+                '<div class="list-group-item-pre">' + utils.convertUint8ArrayToHex(obj.fingerprint, ':') +
                 usageLabels +
                 '</div>' +
               '</a>');
 
-              $identities.append($el);
-              $el.click(function(){
+              $debugIdentities.append($el2);
+              $el2.click(function(){
                 // set active
-                $identities.find('a').removeClass('active');
-                $el.addClass('active');
-                module.setActiveIdentity(keyObject);
+                $debugIdentities.find('a').removeClass('active');
+                $el2.addClass('active');
+                module.setActiveIdentity(obj);
               });
+              module.setActiveIdentity(null);
             });
           }).catch(function(err){
             console.log(err);
@@ -144,7 +245,7 @@
 
           // Attach handlers
           $('#btnClearDebug').click(function(){
-            debug.clear('Clear please');
+            debug.clear();
           });
 
           $('#btnClearInput,#btnClearOutput').click(function(){
@@ -186,6 +287,10 @@
             $('#output').val(input);
           });
 
+          $('#btnSelectKeys').click(function(){
+            $('#navbar a[href="#identities"]').tab('show');
+          });
+
           $('#btnSaveOutput').click(function(){
             module.saveNote();
           });
@@ -201,15 +306,15 @@
             module.verify();
           });
 
-          $('#btnGenerateExportableKeys').click(function(){
-            var name = $('#inputExportableKeysName').val();
-            module.generateKey(true, name);
-            $('#inputExportableKeysName').val('');
-          });
-          $('#btnGeneratePrivateKeys').click(function(){
-            var name = $('#inputPrivateKeysName').val();
-            module.generateKey(false, name);
-            $('#inputPrivateKeysName').val('');
+          $('#btnGenerateKeys').click(function(){
+            var name = $('#inputName').val();
+            var exportable = $('#checkboxExportable').is(":checked");
+            if (name.length!==0) {
+              module.generateKey(exportable, name);
+              $('#modalGenerateIdentity').modal('hide');
+              $('#inputName').val('');
+              $('#checkboxExportable').attr('checked', false);
+            }
           });
           $('#btnGenerateSigningKeys').click(function(){
             var name = $('#inputSigningKeysName').val();
@@ -232,7 +337,7 @@
           });
 
           // Attach debug to debug div element
-          debug.attach(document.getElementById('debug'));
+          debug.attach(document.getElementById('console'));
 
           module.refreshIdentities();
           module.refreshNotes();
@@ -340,35 +445,41 @@
         },
 
         decrypt: function() {
-          var data = $('#input').val();
-          var encryptedDataFromBase64 = utils.convertBase64ToUint8Array(data);
-          try {
-            var promise = window.crypto.subtle.decrypt({
-                name: "RSA-OAEP"
-              },
-              module.activeIdentity.private,
-              encryptedDataFromBase64
-            )
-            .then(
-              function(result){
-                var decryptedData = new Uint8Array(result);
-                var data = utils.convertArrayBufferToText(decryptedData);
-                debug.info('<b>Decrypted:</b><br />' + utils.convertUint8ArrayToHexView(decryptedData, 16));
-                $('#output').val(data);
-              },
-              function(e){
+          return new Promise(function(resolve, reject){
+            var data = $('#input').val();
+            var encryptedDataFromBase64 = utils.convertBase64ToUint8Array(data);
+            try {
+              var promise = window.crypto.subtle.decrypt({
+                  name: "RSA-OAEP"
+                },
+                module.activeIdentity.private,
+                encryptedDataFromBase64
+              )
+              .then(
+                function(result){
+                  var decryptedData = new Uint8Array(result);
+                  var data = utils.convertArrayBufferToText(decryptedData);
+                  debug.info('<b>Decrypted:</b><br />' + utils.convertUint8ArrayToHexView(decryptedData, 16));
+                  $('#output').val(data);
+                  resolve(data);
+                },
+                function(e){
+                  $('#output').val('');
+                  debug.error('<b>Decrypt failed!</b> ' + e.message);
+                  reject(e.message);
+                }
+              )
+              .catch(function(e){
                 $('#output').val('');
                 debug.error('<b>Decrypt failed!</b> ' + e.message);
-              }
-            )
-            .catch(function(e){
+                reject(e.message);
+              });
+            } catch (e) {
               $('#output').val('');
               debug.error('<b>Decrypt failed!</b> ' + e.message);
-            });
-          } catch (e) {
-            $('#output').val('');
-            debug.error('<b>Decrypt failed!</b> ' + e.message);
-          }
+              reject(e.message);
+            }
+          });
         },
 
         importKey: function() {
