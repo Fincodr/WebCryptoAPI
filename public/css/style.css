@@ -63,6 +63,11 @@ body {
   resize: none;
 }
 
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+  background-color: #fff;
+  cursor: text;
+}
+
 .theme-notes .panel-debug-body::before, .theme-notes .panel-debug-body::after {
   display: none;
 }

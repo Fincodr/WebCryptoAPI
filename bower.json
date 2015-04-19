@@ -25,6 +25,7 @@
     "font-awesome": "~4.3.0",
     "moment": "~2.10.2",
     "awesome-bootstrap-checkbox": "~0.3.4",
-    "bootstrap-select": "~1.6.4"
+    "bootstrap-select": "~1.6.4",
+    "js-base64": "~2.1.8"
   }
 }

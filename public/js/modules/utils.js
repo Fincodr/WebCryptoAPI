@@ -49,6 +49,15 @@
         return data;
       },
 
+      utf8_to_b64: function(str) {
+        return window.btoa(unescape(encodeURIComponent(str)));
+      },
+
+      decodeBase64url: function(str) {
+        str = (str + '==').slice(0, str.length + (str.length % 2));
+        return str.replace(/-/g, '+').replace(/_/g, '/');
+      },
+
       convertTextToArrayBuffer: function(s) {
         var buf = new ArrayBuffer(s.length);
         var view = new Uint8Array(buf);
@@ -58,8 +67,68 @@
         return buf;
       },
 
+      packUint8Arrays: function() {
+        // generate big enough new array z
+        var i, len, ptr, count = arguments.length, totalLength = 0;
+        for (i=0; i!==count; ++i) {
+          if (arguments[i]) {
+            totalLength += arguments[i].length;
+          }
+        }
+        var z = new Uint8Array(totalLength + count*2);
+        // copy data
+        for (i=0, ptr=0; i!==count; ++i) {
+          if (arguments[i]) {
+            len = arguments[i].length;
+            z.set(arguments[i], ptr + 2);
+          } else {
+            len = 0;
+          }
+          var datalen = new Uint16Array(2);
+          datalen[0] = len >> 8;
+          datalen[1] = len - (datalen[0]*256);
+          if (len > 65535) {
+            throw new Error('packUint8Arrays supports max length of 65535 bytes of data per packed component');
+          }
+          z.set(datalen, ptr);
+          ptr += len + 2;
+        }
+        return z;
+      },
+
+      unpackUint8Arrays: function(data) {
+        var i = 0, len, ptr = 0, totalLength = data.length;
+        var z = [];
+        // copy data
+        while (ptr < totalLength) {
+          len = data[ptr] * 256 + data[ptr+1];
+          if (ptr+2+len > totalLength) {
+            throw new Error('unpackUint8Arrays out of bounds!');
+          }
+          z.push(data.subarray(ptr + 2, ptr + 2 + len));
+          ptr += len + 2;
+          ++i;
+        }
+        return z;
+      },
+
+      concatUint8Arrays: function() {
+        // generate big enough new array z
+        var i, ptr = 0, totalLength = 0;
+        for (i=0; i!==arguments.length; ++i) {
+          totalLength += arguments[i].length;
+        }
+        var z = new Uint8Array(totalLength);
+        // copy data
+        for (i=0; i!==arguments.length; ++i) {
+          z.set(arguments[i], ptr);
+          ptr += arguments[i].length;
+        }
+        return z;
+      },
+
       convertBase64ToUint8Array: function(data) {
-        var binary = atob(data);
+        var binary = window.atob(data);
         var len = binary.length;
         var buf = new ArrayBuffer(len);
         var view = new Uint8Array(buf);
@@ -71,7 +140,7 @@
 
       convertUint8ArrayToBase64: function(data) {
         var s = module.convertUint8ArrayToText(data);
-        return btoa(s);
+        return window.btoa(s);
       },
 
       convertUint8ArrayToText: function(data) {
@@ -90,6 +159,22 @@
         return s;
       },
 
+      convertArrayBufferToUint8Array: function(data) {
+        var a = new Uint8Array(data.byteLength);
+        for (var i=0, len=data.byteLength; i!==len; ++i) {
+          a[i] = data[i];
+        }
+        return a;
+      },
+
+      convertUint8ArrayToArrayBuffer: function(data) {
+        var a = new ArrayBuffer(data.length);
+        for (var i=0, len=data.length; i!==len; ++i) {
+          a[i] = data[i];
+        }
+        return a;
+      },
+
       convertUint8ArrayToHex: function(data, sep) {
         var a, h = '';
         var ch = sep===null?' ':sep;
@@ -102,9 +187,9 @@
         return h;
       },
 
-      convertUint8ArrayToHexView: function(data, width) {
+      convertUint8ArrayToHexView: function(data, width, sep) {
         var a, h = '', s = '';
-        var ch = ' ';
+        var ch = sep===undefined?' ':sep;
         var n = 0;
         h = '[length: ' + data.length + ' bytes (' + data.length * 8 + ' bits)]\n';
         for (var i=0, len=data.length; i!==len; ++i) {

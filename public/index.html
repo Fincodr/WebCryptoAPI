@@ -47,15 +47,53 @@
             <h4 class="modal-title" id="myModalLabel"><i class="fa fa-envelope fa-2x"></i> Decrypted note</h4>
           </div>
           <div class="modal-body">
+            <h3><label for="modalDecryptSenderName">Sender:</label> <span class="label" id="modalDecryptSenderName"></span></h3>
+            <div class="row">
+              <label class="col-sm-3">Encryption-Key fingerprint:</label>
+              <span id="modalDecryptSenderFingerprint"></span><br />
+            </div>
+            <div class="row">
+              <label class="col-sm-3">Signing-key fingerprint:</label>
+              <span id="modalDecryptSignerFingerprint"></span><br />
+            </div>
+            <!-- sender notices -->
+            <div class="alert alert-danger hide" id="modalDecryptSenderNotKnown">
+              <p><i class="glyphicon glyphicon-alert"></i> <b>Warning:</b> Sender not known!</p>
+              <p>
+                <button type="button" class="btn btn-default" id="btnDecryptAddToKnownSenders">Add this sender to known senders</button>
+              </p>
+            </div>
+            <div class="alert alert-info hide" id="modalDecryptSenderNotTrusted">
+              <p><i class="glyphicon glyphicon-alert"></i> <b>Warning:</b> Sender is known but not trusted.</p>
+              <p>
+                <button type="button" class="btn btn-default" id="btnDecryptTrustSender">Trust this sender</button>
+              </p>
+            </div>
+            <div class="alert alert-success hide" id="modalDecryptSenderTrusted">
+              <p><i class="glyphicon glyphicon-info"></i> <b>Sender is trusted.</b> <a href="#" id="btnDecryptRevokeTrustSender">Revoke trust</a></p>
+            </div>
+            <!-- digital signature notices -->
+            <div class="alert alert-danger hide" id="modalDecryptNoDigitalSignature">
+              <p><i class="glyphicon glyphicon-alert"></i> <b>Warning:</b> Digital Signature not found. Sender identity cannot be verified.</p>
+            </div>
+            <div class="alert alert-danger hide" id="modalDecryptDigitalSignatureInvalid">
+              <p><i class="glyphicon glyphicon-alert"></i> <b>Digital Signature is invalid!</b> </p>
+            </div>
+            <div class="alert alert-info hide" id="modalDecryptDigitalSignatureValidButNotTrusted">
+              <p><i class="glyphicon glyphicon-alert"></i> <b>Warning:</b> Digital Signature is valid but key used for signing is not current.</p>
+              <p>
+                <button type="button" class="btn btn-default" id="btnDecryptTrustSigningKey">Trust this key</button>
+              </p>
+            </div>
+            <div class="alert alert-success hide" id="modalDecryptDigitalSignatureValid">
+              <p><b>Digital Signature is valid.</b></p>
+            </div>
             <form role="form">
               <div class="form-group">
                 <label for="exampleInputText">Note contents:</label>
-                <textarea type="text" rows="7" class="form-control textarea" id="outputNote" placeholder="contents"></textarea>
+                <textarea type="text" rows="15" class="form-control textarea" id="outputNote" placeholder="contents" disabled></textarea>
               </div>
             </form>
-            <div class="alert alert-danger">
-                <p><i class="glyphicon glyphicon-alert"></i> <b>Warning:</b> This note is not <b>digitally signed</b>. Senders identity is not known.</p>
-              </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
@@ -73,15 +111,10 @@
             <h4 class="modal-title" id="myModalLabel"><i class="fa fa-envelope fa-2x"></i> Create note</h4>
           </div>
           <div class="modal-body">
-
             <form role="form">
-
               <div class="form-group">
-                <label for="inputName">Recipient identity:</label>
-                <select class="selectpicker" data-width="auto" data-live-search="true" data-show-subtext="true">
-                  <option data-subtext="00:12:34:55:66:9a:ca:fe:24:44:00:12:34:55:66:9a:ca:fe:24:44">Mustard</option>
-                  <option data-subtext="43:11:53:57:96:fa:ca:fe:24:44:00:12:34:55:66:9a:ca:fe:24:44">Ketchup</option>
-                  <option data-subtext="69:12:22:ee:e6:aa:ca:fe:24:44:00:12:34:55:66:9a:ca:fe:24:44">Relish</option>
+                <label for="selectRecipientList">Recipient identity:</label>
+                <select class="selectpicker" data-width="auto" data-live-search="true" data-show-subtext="true" id="selectRecipientList">
                 </select>
                 <p class="help-block">Please note that only the selected recipient identity can read the note, provided that the recipient have the private-key for the identity.</p>
               </div>
@@ -89,7 +122,7 @@
                 <label for="exampleInputText">Note contents:</label>
                 <textarea type="text" rows="7" class="form-control textarea" id="inputNote" placeholder="contents"></textarea>
               </div>
-              <div class="alert alert-success">
+              <div class="alert alert-success hide" id="createNoteSignDigitally">
                 <p><i class="glyphicon glyphicon-info"></i> If you digitally sign the note, the recipient can verify that your identity was used to sign the note. Please note that it also means that the note is not anonymous anymore since the recipient knows who sent the note. As a bonus the recipient also receives your public-key so that the recipient can reply to your note.</p>
                 <div class="checkbox">
                   <input type="checkbox" id="checkboxDigitallySign">
@@ -97,11 +130,10 @@
                 </div>
               </div>
             </form>
-
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="btnCreateNote">Save</button>
+            <button type="button" class="btn btn-primary" id="btnCreateNoteSave">Save</button>
           </div>
         </div>
       </div>
@@ -116,66 +148,112 @@
             <h4 class="modal-title" id="myModalLabel"><i class="fa fa-key fa-2x"></i> Create identity</h4>
           </div>
           <div class="modal-body">
-
             <form role="form">
-
-              <div role="tabpanel">
-                <!-- Nav tabs -->
-                <!--
-                <ul class="nav nav-tabs" role="tablist">
-                  <li role="presentation" class="active"><a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a></li>
-                  <li role="presentation"><a href="#import" aria-controls="profile" role="tab" data-toggle="tab">Import</a></li>
-                </ul>
-                -->
-                <p>
-                  Creating an <b>identity</b> allows you to store secret messages that only can read.<!--share your public identity and receive messages that only you can read. Not even the sender can read the message after they have been sent.-->
-                </p>
-                <!-- Tab panes -->
-                <div class="form-group">
-                  <label for="inputName">Anonymous name</label>
-                  <input type="text" class="form-control" id="inputName" placeholder="Enter name">
-                  <p class="help-block">Please note that you never should disclose anything personal like your real name or email here.</p>
-                </div>
-
-                <div class="alert alert-success"><i class="glyphicon glyphicon-info-sign"></i> Your identity has public and private keys. You can safely share your public-key to anybody but you must keep the private key secret to protect your identity.<!--You and your friends should always verify the identity fingerprint over the phone or by meeting before trusting the identity.--></div>
-
-                <div class="tab-content">
-                  <div role="tabpanel" class="tab-pane active" id="create">
-                  </div>
-                  <div role="tabpanel" class="tab-pane hidden" id="import">
-                    <div class="form-group textarea">
-                      <label for="exampleInputEmail1">Public Key</label>
-                      <textarea type="text" rows="7" class="form-control textarea" id="inputPublicKey" placeholder="Paste your public-key here"></textarea>
-                    </div>
-                    <div class="form-group">
-                      <label for="exampleInputPassword1">Private Key (Optional)</label>
-                      <textarea type="text" rows="7" class="form-control textarea" id="inputPrivateKey" placeholder="(Optional) Paste your private-key here"></textarea>
-                      <p class="help-block">If you provide private-key, you can also receive messages using this identity.</p>
-                    </div>
-                  </div>
-                </div>
+              <p>
+                Creating an <b>identity</b> allows you to digitally sign sent message and receive messages from other users.
+              </p>
+              <!-- Tab panes -->
+              <div class="form-group">
+                <label for="inputName">Anonymous name</label>
+                <input type="text" class="form-control" id="inputName" placeholder="Enter name">
+                <p class="help-block">Please note that you never should disclose anything personal like your real name or email here.</p>
               </div>
-
-              <!-- Form: Common settings -->
-              <!--<div class="checkbox disabled">
-                <label>
-                  <input type="checkbox" id="checkboxPublic" disabled> <del>This is public profile (share your anonymous name and your public key to others)</del>
-                </label>
-              </div>-->
-
+              <div class="alert alert-success">
+                <i class="glyphicon glyphicon-info-sign"></i> Your identity has public and private side. You can safely share your public identity to anybody, but you must keep the private part secret to protect your identity.
+              </div>
               <div class="alert alert-danger">
-                <p><i class="glyphicon glyphicon-alert"></i> If you make this identity exportable, you can share it (manually) with your other computer or device.</p>
-                <div class="checkbox checkbox-danger">
-                <input type="checkbox" id="checkboxExportable">
-                <label for="checkboxExportable">Make this identity exportable</label>
-              </div>
+                <p>
+                  <i class="glyphicon glyphicon-alert"></i> If you make this identity exportable, you can share it (manually) with your other computer or device.
+                </p>
+                <div class="checkbox">
+                  <input type="checkbox" id="checkboxExportable">
+                  <label for="checkboxExportable">Make this identity exportable</label>
+                </div>
               </div>
             </form>
-
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="btnGenerateKeys">Save</button>
+            <button type="button" class="btn btn-primary" id="btnGenerateIdentitySave">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- importIdentity -->
+    <div class="modal fade theme-notes" id="modalImportIdentity" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><i class="fa fa-key fa-2x"></i> Import identity</h4>
+          </div>
+          <div class="modal-body">
+            <form role="form">
+              <p>
+                Importing an <b>private identity</b> allows you to digitally sign sent message and receive messages from other users. Importing an <b>public identity</b> allows you to send messages to the user.
+              </p>
+              <div class="form-group">
+                <label for="importIdentityName">Anonymous name</label>
+                <input type="text" class="form-control" id="importIdentityName" placeholder="Enter name">
+                <p class="help-block">Please note that you never should disclose anything personal like your real name or email here.</p>
+              </div>
+              <div class="alert alert-success">
+                <i class="glyphicon glyphicon-info-sign"></i> Your <b>private identity</b> has public and private side. You can safely share your public identity to anybody, but you must keep the private part secret to protect your identity. <b>public identity</b> only has public side.
+              </div>
+              <div class="form-group textarea">
+                <label for="importIdentityData">Identity</label>
+                <textarea type="text" rows="15" class="form-control textarea" id="importIdentityData" placeholder="Paste your identity here"></textarea>
+              </div>
+              <div class="alert alert-danger">
+                <p>
+                  <i class="glyphicon glyphicon-alert"></i> If you make this identity exportable, you can share it (manually) with your other computer or device.
+                </p>
+                <div class="checkbox checkbox-danger">
+                <input type="checkbox" id="checkboxImportExportable">
+                <label for="checkboxImportExportable">Make this identity exportable</label>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnImportIdentitySave">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- exportIdentity -->
+    <div class="modal fade theme-notes" id="modalExportIdentity" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><i class="fa fa-key fa-2x"></i> Export identity</h4>
+          </div>
+          <div class="modal-body">
+            <form role="form">
+              <p>
+                Exporting an <b>identity</b> allows you to use the same identity on some other computer or device.
+              </p>
+              <h3><label for="modalExportIdentityName">Name:</label> <span class="label label-success" id="modalExportIdentityName"></span></h3>
+              <div class="row">
+                <label class="col-sm-3">Encryption-Key fingerprint:</label>
+                <span id="modalExportIdentityKeyFingerprint"></span><br />
+              </div>
+              <div class="row">
+                <label class="col-sm-3">Signing-key fingerprint:</label>
+                <span id="modalExportIdentitySigningFingerprint"></span><br />
+              </div>
+              <div class="form-group">
+                <label for="exampleInputText">Exported identity:</label>
+                <textarea type="text" rows="15" class="form-control textarea" id="outputIdentity" placeholder="contents" disabled></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
           </div>
         </div>
       </div>
@@ -222,7 +300,7 @@
           <div id="notesSection" class="hidden">
             <div class="page-header">
               <h2>Notes</h2>
-              <p><a class="btn btn-default" href="#" role="button" id="btnCreateNote" data-toggle="modal" data-target="#modalCreateNote">Create new note</a></p>
+              <p><a class="btn btn-default" href="#" role="button" id="btnCreateNote">Create new note</a></p>
             </div>
             <div class="table-responsive">
               <table class="table table-hover">
@@ -232,7 +310,7 @@
                     <th>Created</th>
                     <th>Expires</th>
                     <th>ID</th>
-                    <th>Status</td>
+                    <!--<th>Status</td>-->
                   </tr>
                 </thead>
                 <tbody id="notesTableBody">
@@ -246,9 +324,10 @@
         </div>
         <div role="tabpanel" class="tab-pane fade" id="identities">
           <div class="page-header">
-            <h2>Local identities</h2>
+            <h2>Your identities</h2>
             <p>
               <a class="btn btn-default" href="#" role="button" id="btnConfigureKeys" data-toggle="modal" data-target="#modalGenerateIdentity">Create identity</a>
+              <a class="btn btn-default" href="#" role="button" id="btnImportKeys" data-toggle="modal" data-target="#modalImportIdentity">Import identity</a>
             </p>
           </div>
           <div class="table-responsive">
@@ -265,23 +344,26 @@
               </tbody>
             </table>
           </div>
-          <!--
           <div class="page-header">
-            <h2>Public identities</h2>
+            <h2>Known identities</h2>
+            <p>
+              <a class="btn btn-default" href="#" role="button" id="btnImportKnownIdentity" data-toggle="modal" data-target="#modalImportIdentity">Import known identity</a>
+            </p>
             <div class="table-responsive">
               <table class="table table-hover">
                 <thead>
                   <tr>
                     <th>Name</th>
                     <th>Fingerprint</th>
-                    <th>Functions</td>
+                    <th>Usage</td>
+                    <th>Operations</td>
                   </tr>
                 </thead>
                 <tbody id="publicKeysTableBody">
                 </tbody>
               </table>
             </div>
-          </div>-->
+          </div>
         </div>
         <div role="tabpanel" class="tab-pane fade" id="about">
           <div class="page-header">
@@ -382,7 +464,7 @@ SOFTWARE.</pre>
                   <form role="form">
                     <div class="form-group">
                       <label for="name" class="sr-only">Output text</label>
-                      <textarea class="form-control textarea-output" rows="7" id="output"></textarea>
+                      <textarea class="form-control textarea-output" rows="7" id="output" disabled></textarea>
                     </div>
                   </form>
                 </div>
@@ -399,10 +481,11 @@ SOFTWARE.</pre>
                   <button type="button" class="btn btn-default" id="btnSign">sign</button>
                   <button type="button" class="btn btn-default" id="btnVerify">verify</button>
                   <button type="button" class="btn btn-default" id="btnDigest">digest</button>
-                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalGenerateIdentity">generateKeys</button>
-                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#generateSigningKeysModal">generateSigningKeys</button>
-                  <button type="button" class="btn btn-default" id="btnImportKey">importKey</button>
+                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalGenerateIdentity" id="btnGenerateIdentity">generateIdentity</button>
+                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalImportIdentity" id="btnImportIdentity">importIdentity</button>
+                  <!--<button type="button" class="btn btn-default" id="btnImportKnownIdentity">importKnownIdentity</button>-->
                   <button type="button" class="btn btn-default" id="btnExportKey">exportKey</button>
+                  <button type="button" class="btn btn-default" id="btnExportIdentity">exportIdentity</button>
                   <!--<button type="button" class="btn btn-default">deriveKey</button>
                   <button type="button" class="btn btn-default">deriveBits</button>
                   <button type="button" class="btn btn-default">wrapKey</button>
@@ -424,25 +507,6 @@ SOFTWARE.</pre>
                 </div>
                 <div class="panel-body panel-debug-body" id="console"></div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- generateSigningKeysModal -->
-      <div class="modal fade" id="generateSigningKeysModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title" id="myModalLabel">Enter name for the generated signing keys</h4>
-            </div>
-            <div class="modal-body">
-              <input type="text" class="form-control" placeholder="Name for generated keys" id="inputSigningKeysName">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="btnGenerateSigningKeys" data-dismiss="modal">Save changes</button>
             </div>
           </div>
         </div>

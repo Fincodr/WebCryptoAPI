@@ -214,6 +214,32 @@
     });
   };
 
+  app.Backend.prototype.updateData = function(data) {
+    var self = this;
+    // append data
+    return new Promise(function(resolve, reject){
+      if (!self.dbHandle) {
+        reject('Error: No database open.');
+      }
+      var transaction = self.dbHandle.transaction([self.dbObjectStoreName], "readwrite");
+      var objectStore = transaction.objectStore(self.dbObjectStoreName);
+      var request;
+      try {
+        request = objectStore.put(data);
+      } catch (e) {
+        if (e.name == 'DataCloneError') {
+          reject("This engine doesn't know how to clone this type of object, try Firefox");
+        }
+      }
+      request.onerror = function(event) {
+        reject(event.target.error.message);
+      };
+      request.onsuccess = function(event) {
+        resolve(data);
+      };
+    });
+  };
+
   app.Backend.prototype.clear = function() {
     var self = this;
     // delete all data

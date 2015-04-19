@@ -17,10 +17,12 @@ var credentials = { key: privateKey, cert: certificate };
   self: script, style, img, font
  */
 app.use(function(req, res, next) {
+  /*
   res.setHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
   res.setHeader("X-Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
   res.setHeader("X-WebKit-CSP", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
   res.removeHeader("X-Powered-By");
+  */
   return next();
 });
 app.use(express.static(path.join(__dirname, "../public")));
