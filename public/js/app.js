@@ -837,6 +837,9 @@
             module.refreshIdentities().then(function(){
               module.setActiveIdentity();
               module.refreshNotes();
+              setInterval(function(){
+                module.refreshNotes();
+              }, 1000*30);
             });
           } else {
             debug.error('Web Cryptography API is NOT supported!');
