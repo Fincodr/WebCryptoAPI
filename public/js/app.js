@@ -162,13 +162,13 @@
         refreshNotes: function() {
           // Update notes view (notes for active identity)
           var $notes = $('#notesTableBody');
-          $notes.empty();
           var $notesFooter = $('#notesTableFooter');
           $notesFooter.empty();
           var notesCount = 0;
           var now = moment();
           if (module.activeIdentity) {
             noteStorage.getAllData(module.activeIdentity.publicKeyFingerprint).then(function(data){
+              $notes.empty();
               _.forEach(data, function(obj){
                 if (utils.compareTwoUint8Arrays(module.activeIdentity.publicKeyFingerprint, obj.publicKeyFingerprint)) {
                   notesCount++;
