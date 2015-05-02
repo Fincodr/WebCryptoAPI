@@ -178,7 +178,7 @@
                   var $el = $('<tr class="clickable-row">' +
                     '<td>' + created.toISOString() + '</td>' +
                     '<td>in ' + diff + ' hour(s)</td>' +
-                    '<td class="id">' + utils.convertUint8ArrayToHex(obj.id, ':') + '</td>' +
+                    '<td class="id"><a href="#' + utils.convertUint8ArrayToHex(obj.id) + '">'  + utils.convertUint8ArrayToHex(obj.id, ':') + '</a></td>' +
                     //'<td><span class="label label-danger">not signed</span></td>' +
                   '</tr>');
                   $notes.append($el);
