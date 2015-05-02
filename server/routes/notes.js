@@ -2,6 +2,7 @@ var express   = require('express');
 var Moment    = require('moment');
 var base64    = require('base64-js');
 var _         = require('lodash');
+var CryptoJS  = require('cryptojs').Crypto;
 var limiter   = require('limiter');
 var router    = express.Router();
 
@@ -30,13 +31,16 @@ router.post('/', function(req, res, next) {
       var now = new Moment();
       try {
         var postData = req.body;
-        var fingerprint = postData.fingerprint;
+        var buffer = new Buffer(postData.fingerprint, "hex");
+        var fingerprint = buffer.toJSON().data;
         var data = postData.data;
         if (_.isArray(fingerprint) && fingerprint.length === 20 && data.length < 32768) {
+          var hash = CryptoJS.SHA1(data);
           var note = new Note({
             created_at: now.toDate(),
             expires_at: new Moment(now).add(NOTE_KEEPTIME_IN_HOURS, 'hours').toDate(),
-            fingerprint: postData.fingerprint,
+            fingerprint: fingerprint,
+            hash: hash.toString(),
             data: data
           });
           note.save(function (err) {
@@ -69,10 +73,19 @@ router.get('/:fingerprint', function(req, res, next) {
       var buffer = new Buffer(req.params.fingerprint, "hex");
       var id = buffer.toJSON().data;
       if (_.isArray(id) && id.length === 20) {
-        Note.find({ fingerprint: id, expires_at: { $gt: now.toDate() } }, function(err, notes){
+        Note.find({
+          fingerprint: id,
+          expires_at: { $gt: now.toDate() }
+        },
+        null,
+        {
+          sort: { 'created_at': -1 }
+        },
+        function(err, notes){
           if (err) {
-            res.status(400);
-            res.send({ status: 'ERROR', message: 'Failed.' });
+            res.status(200);
+            res.json([]);
+            //res.send({ status: 'ERROR', message: 'Failed.' });
           } else {
             res.status(200);
             res.json(notes);

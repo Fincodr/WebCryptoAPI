@@ -122,8 +122,12 @@
                 <label for="exampleInputText">Note contents:</label>
                 <textarea type="text" rows="7" class="form-control textarea" id="inputNote" placeholder="contents"></textarea>
               </div>
+              <div class="checkbox">
+                <input type="checkbox" id="checkboxAnonymous">
+                <label for="checkboxAnonymous">Anonymous message (your public identity is not shared with the recipient)</label>
+              </div>
               <div class="alert alert-success hide" id="createNoteSignDigitally">
-                <p><i class="glyphicon glyphicon-info"></i> If you digitally sign the note, the recipient can verify that your identity was used to sign the note. Please note that it also means that the note is not anonymous anymore since the recipient knows who sent the note. As a bonus the recipient also receives your public-key so that the recipient can reply to your note.</p>
+                <p id="createNoteSignDigitallyEnabled"><i class="glyphicon glyphicon-info"></i> If you digitally sign the note, the recipient can verify that your identity was used to sign the note.</p>
                 <div class="checkbox">
                   <input type="checkbox" id="checkboxDigitallySign">
                   <label for="checkboxDigitallySign">Digitally sign</label>
@@ -132,7 +136,7 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-default" id="btnCreateNoteCancel">Cancel</button>
             <button type="button" class="btn btn-primary" id="btnCreateNoteSave">Save</button>
           </div>
         </div>
@@ -525,7 +529,8 @@ SOFTWARE.</pre>
     <script src="vendor/lodash/lodash.min.js"></script>
     <!-- Include our modules -->
     <script src="js/modules/cryptography.js"></script>
-    <script src="js/modules/backend.js"></script>
+    <script src="js/modules/backendLocal.js"></script>
+    <script src="js/modules/backendRemote.js"></script>
     <script src="js/modules/debug.js"></script>
     <script src="js/modules/utils.js"></script>
     <!-- Include our main script last -->

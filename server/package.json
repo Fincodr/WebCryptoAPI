@@ -13,6 +13,7 @@
     "base64-js": "0.0.8",
     "body-parser": "^1.12.2",
     "colors2": "^2.0.1-1",
+    "cryptojs": "^2.5.3",
     "express": "^4.12.3",
     "limiter": "^1.0.5",
     "lodash": "^3.6.0",
