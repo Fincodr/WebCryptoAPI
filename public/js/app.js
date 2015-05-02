@@ -9,16 +9,14 @@
     // The main application module
     var app = parent.app = parent.app || {};
 
-    var USE_REMOTE_BACKEND = true;
-
     // aliases
     var utils = app.utils;
     var debug = app.debug;
     var cryptography = app.cryptography;
     var keyStorage = new app.BackendLocal('PrivateKeys', 'store', ['name', 'publicKeyFingerprint', 'verifyKeyFingerprint'], 'name');
     var noteStorage;
-    if (USE_REMOTE_BACKEND) {
-      noteStorage = new app.BackendRemote('https://localhost', 'notes');
+    if (app.config.useServerBackend) {
+      noteStorage = new app.BackendRemote(app.config.remoteAddress, 'notes');
     } else {
       noteStorage = new app.BackendLocal('PrivateNotes', 'store', ['publicKeyFingerprint', 'created', 'id'], 'created');
     }
