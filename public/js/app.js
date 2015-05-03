@@ -624,8 +624,11 @@
             var $list = $('#selectRecipientList');
             $list.empty();
             _.forEach(module.identities, function(obj) {
-              var $el = $('<option value="' + utils.convertUint8ArrayToHex(obj.publicKeyFingerprint, '') + '" data-subtext="' + utils.convertUint8ArrayToHex(obj.publicKeyFingerprint, ':') + '">' + obj.name + '</option>');
-              $list.append($el);
+              // skip our own identity
+              if (!utils.compareTwoUint8Arrays(module.activeIdentity.publicKeyFingerprint, obj.publicKeyFingerprint)) {
+                var $el = $('<option value="' + utils.convertUint8ArrayToHex(obj.publicKeyFingerprint, '') + '" data-subtext="' + utils.convertUint8ArrayToHex(obj.publicKeyFingerprint, ':') + '">' + obj.name + '</option>');
+                $list.append($el);
+              }
             });
             $list.selectpicker('render');
             $list.selectpicker('refresh');
