@@ -163,11 +163,13 @@
           // Update notes view (notes for active identity)
           var $notes = $('#notesTableBody');
           var $notesFooter = $('#notesTableFooter');
-          $notesFooter.empty();
+          // Update debug view (all notes)
+          var $debugNotes = $('#debugNotes');
           var notesCount = 0;
           var now = moment();
           if (module.activeIdentity) {
             noteStorage.getAllData(module.activeIdentity.publicKeyFingerprint).then(function(data){
+              $debugNotes.empty();
               $notes.empty();
               _.forEach(data, function(obj){
                 if (utils.compareTwoUint8Arrays(module.activeIdentity.publicKeyFingerprint, obj.publicKeyFingerprint)) {
@@ -190,15 +192,8 @@
                   });
                 }
               });
+              $notesFooter.empty();
               $notesFooter.html('Total of ' + notesCount + ' note(s)');
-            }).catch(function(err){
-              console.log(err);
-            });
-
-            // Update debug view (all notes)
-            var $debugNotes = $('#debugNotes');
-            noteStorage.getAllData(module.activeIdentity.publicKeyFingerprint).then(function(data){
-              $debugNotes.empty();
               _.forEach(data, function(obj){
                 // Append debug
                 var $el = $('<a href="#" class="list-group-item">' +
@@ -402,10 +397,12 @@
                           module.refreshIdentities();
                         });
                         e.preventDefault();
-                      } else {
+                      } else if ($(e.target).parent().data('action') == 'export') {
                         // export
                         module.setActiveIdentity(obj);
                         module.exportIdentity();
+                        e.preventDefault();
+                      } else {
                         e.preventDefault();
                       }
                     });
