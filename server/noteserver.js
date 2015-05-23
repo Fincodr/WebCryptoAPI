@@ -22,14 +22,11 @@ var credentials = { key: privateKey, cert: certificate };
 // Connect to mongoDB
 mongoose.connect('mongodb://localhost/notes');
 
-/*
-  Content Security Policy headers
-
-  default: block all
-  self: script, style, img, font
- */
 app.use(function(req, res, next) {
   /*
+  // Content Security Policy headers
+  // default: block all
+  // self: script, style, img, font
   res.setHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
   res.setHeader("X-Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
   res.setHeader("X-WebKit-CSP", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
@@ -42,7 +39,6 @@ app.use(function(req, res, next) {
 app.use(bodyParser.json());
 
 app.use(express.static(path.join(__dirname, "../public")));
-// not bundled anymore: app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 
 app.use('/api/v1/notes', notes);
 

@@ -12,6 +12,7 @@
     var self = this;
 
     var module = {
+
       stringPadRight: function(str, len, ch) {
         var chx = ch || ' ';
         while(str.length < len) {
@@ -47,15 +48,6 @@
           data[i] = s.charCodeAt(i);
         }
         return data;
-      },
-
-      utf8_to_b64: function(str) {
-        return window.btoa(unescape(encodeURIComponent(str)));
-      },
-
-      decodeBase64url: function(str) {
-        str = (str + '==').slice(0, str.length + (str.length % 2));
-        return str.replace(/-/g, '+').replace(/_/g, '/');
       },
 
       convertTextToArrayBuffer: function(s) {

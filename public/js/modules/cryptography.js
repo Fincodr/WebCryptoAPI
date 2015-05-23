@@ -27,24 +27,12 @@
 
     var module = {
 
-      checkSupport: function() {
-        // TODO: implement the actual algorithm support checking
-        // by running different tests.
-        return true;
-      },
-
       isSupported: function() {
-        // check that we have crypto interface
+        // check that we have Crypto interface
         if ("crypto" in window) {
-          // check that we have subtleCryto interface
+          // check that we have SubtleCryto interface
           if ("subtle" in window.crypto) {
-            // check that we can use RSA-OAEP algorithm with encrypt, decrypt, sign, digest, generateKey, exportKey
-            var algo = ["RSA-OAEP"];
-            var methods = ["encrypt", "decrypt", "sign", "digest", "generateKey", "exportKey"];
-            var keyUsage = ["encrypt", "decrypt"];
-            if (module.checkSupport(algo, methods, {keyUsage: keyUsage})) {
-              return true;
-            }
+            return true;
           }
         }
         return false;

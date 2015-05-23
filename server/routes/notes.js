@@ -17,8 +17,8 @@ var NOTE_KEEPTIME_IN_HOURS = 24;
 
 // Rate limiter configuration
 var RateLimiter = require('limiter').RateLimiter;
-var limitByHour = new RateLimiter(200, 'hour', true);      // 200 messages per hour allowed, fire CB immediately when over
-var limitByRate = new RateLimiter(1, 1000);                 // 1000ms between requests
+var limitByHour = new RateLimiter(200, 'hour', true); // 200 messages per hour allowed, fire CB immediately when over
+var limitByRate = new RateLimiter(1, 1000);           // 1000ms between requests
 
 // POST /api/v1/notes
 router.post('/', function(req, res, next) {
