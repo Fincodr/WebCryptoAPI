@@ -10,3 +10,22 @@ The only metadata that the example application shares with the server is the fin
  
 Permanent link for the thesis: http://urn.fi/URN:NBN:fi:amk-201505188702
 
+## Configuration
+
+Copy the public/js/config.template.js to public/js/config.js and edit the file to set configuration.
+
+| Variable | Values | Description |
+| ------------- | ------------- | ------------- |
+| useServerBackend | Boolean  | Set to _true_ to enable server backed. Default value is _false_ |
+| remoteAddress | String  | The http/https endpoint to use for server when _useServerBackend_ is set to true |
+
+Config file contents:
+
+```
+...
+app.config = {
+  useServerBackend: true,				// Use server backend (true) or local storage (false) ?
+  remoteAddress: 'https://localhost'	// Backend address
+};
+```
+
