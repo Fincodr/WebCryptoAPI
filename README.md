@@ -1,6 +1,6 @@
 # SecretNote application source code
 
-For the thesis, as an case study, a proof-of-concept end-to-end secure example application for sharing encrypted and digitally signed messages was implemented. The example application is called **SecretNotes** and it utilizes the new Web Cryptography API for performing cryptographic operations directly on the web browser.
+For the JavaScript Web Cryptography API thesis, as an case study, a proof-of-concept end-to-end secure example application for sharing encrypted and digitally signed messages was implemented. The example application is called **SecretNotes** and it utilizes the new Web Cryptography API for performing cryptographic operations directly on the web browser.
 
 The example application uses asymmetric public-key and symmetric secret-key cryptography as a means to protect the sent messages and also provides a digital signature that can be verified by the receiver (if the sender chooses to share identity). Symmetric secret-key cryptography is used to encrypt and decrypt the actual message payload, allowing it to be longer than the maximum length that could be normally encrypted using asymmetric cryptography.
  
@@ -28,4 +28,26 @@ app.config = {
   remoteAddress: 'https://localhost'	// Backend address
 };
 ```
+
+## Standalone version
+
+The SecretNotes application can be run in standalone mode.
+
+```
+$ cd server
+$ node server.js
+```
+
+## Mongo backend version
+
+The SecretNotes application can be run with mongodb backend.
+
+Prerequisites:
+- MongoDB
+
+```
+$ cd server
+$ node noteserver.js
+```
+
 
