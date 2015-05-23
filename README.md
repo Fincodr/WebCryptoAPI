@@ -59,7 +59,11 @@ $ cd server
 $ sudo node noteserver.js
 ```
 
-## Screenshots
+## Usage example
+
+In this section, a simple use case using the example application is presented. The use case scenario is the following: **Alice** is going to send a digitally signed note to **Bob**. First, Alice and Bob is going to generate identities on their own computers. Then Bob exports public identity and shares it with Alice so that Alice can send note to Bob using Bob’s public cryptographic key. Since Alice uses Bob’s public cryptographic key to encrypt the sent note, only Bob can open and read the note. Alice is also going to digitally sign the sent note and include Alice’s own public identity with the note so that Bob can reply to Alice’s note and also verify that the digital signature is valid (providing both authentication and non-repudiation) and the note has not been tampered with (providing integrity). First, when Alice opens the application in a web browser, the view as seen in following figure is shown. Since Alice has not created an identity, the application instructs to start by creating a new identity.
+
+![S01](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S01_A00_welcome.png)
 
 **Alice** chooses to create a new identity. The following figure contains the notes:
 
