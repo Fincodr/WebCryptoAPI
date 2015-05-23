@@ -1,8 +1,10 @@
 # SecretNote application source code
 
-![Welcome](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S01_A00_welcome.png)
-
 For the JavaScript Web Cryptography API thesis, as an case study, a proof-of-concept end-to-end secure example application for sharing encrypted and digitally signed messages was implemented. The example application is called **SecretNotes** and it utilizes the new Web Cryptography API for performing cryptographic operations directly on the web browser.
+
+Permanent link for the thesis: http://urn.fi/URN:NBN:fi:amk-201505188702
+
+![Welcome](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S01_A00_welcome.png)
 
 The example application uses asymmetric public-key and symmetric secret-key cryptography as a means to protect the sent messages and also provides a digital signature that can be verified by the receiver (if the sender chooses to share identity). Symmetric secret-key cryptography is used to encrypt and decrypt the actual message payload, allowing it to be longer than the maximum length that could be normally encrypted using asymmetric cryptography.
  
@@ -10,8 +12,6 @@ The application does not reveal the plain text message, the decryption keys or o
 
 The only metadata that the example application shares with the server is the fingerprint, an SHA-1 message digest (hash) of the public-key which was used to encrypt the note contents. The fingerprint is used to index the notes on the server so that the notes can be retrieved by the user which have the correct decryption key for reading the notes. The note creation date is managed by the server and the note is automatically expired after 24 hours have passed.
  
-Permanent link for the thesis: http://urn.fi/URN:NBN:fi:amk-201505188702
-
 ## Configuration
 
 Copy the public/js/config.template.js to public/js/config.js and edit the file to set configuration.
@@ -113,10 +113,77 @@ Next,Alice decides to write a note to Bob as seen in the following figure. The f
 3. Alice decides to remain anonymous. Thus she will not reveal her true identity to thereceiver.
 
 ![S07](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S07_A06_create_note.png)
+
+Bob receives the note as can be seen in the following figure. The figure contains the following note:
+
+1. The only info about the received note that Bob can see is the note creation time, when the note is going to expire and the ID which is message digest (hash) whichis calculated from the encrypted note.
+
 ![S08](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S08_B03_notes.png)
+
+Next, Bob decrypts the note sent by Aliceas seen in the following figure. The figure contains the following notes:
+
+1. Since the received note was sent as anonymous there is no way of really knowing who sent the message.
+
+2. Encryption-key and Signing-key fingerprint values are empty since the note was anonymously sent.
+
+3.The note content is visible since it was successfully decrypted using Bob’s private-key.
+
+Bob can now call or meet Alice and ask if Alice really sent the note.
+
 ![S09](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S09_B04_decrypted_note.png)
+
+Next, Alice decides to write another note to Bob as seen in the following figure. This time Alice is going to include public identity and also sign the note with a digital signature so that Bob can verify that note really was sent by Alice. The figure contains the following notes:
+
+1. Alice selects Bob as the target identity from the drop down list.
+
+2. Alice writes the note to be sent.
+
+3. Alice decides to share identity to the receiver.
+
+4. Alice decides to sign the note with digital signature.
+
 ![S10](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S10_A07_create_note.png)
+
+Bob receives another note, this time with Alice’s public identity and also Alice’s digitally signature as seen in the following figure but the sender is still shown as unknown because Bob do not have Alice’s identity. Bob should now verify that the encryption-key finger-print (e6:73:d7:b4:e2:07:ea:96:ce:cf:d3:b1:10:3c:5e:5e:db:21:67:9a) belongs to Alice.
+
+After Bob have verified the fingerprint Bob can import the identity which was included with the note.
+
 ![B05](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S11_B05_decrypted_note_unknown_sender.png)
+
+Bob imports Alice’s identity that he received with the previous note as seen in the following figure. The figure contains the following notes:
+
+1. Bob fills in the name which will be used internally for this known public identity. The name is not shared and is only used for identifying this identity stored locally.
+
+2. The public identity is automatically filled in from the received message.
+
 ![B06](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S12_B06_import_identity.png)
+
+Now Bob can be sure that the sender really is Alice and that the message has not been tampered with since the digital signature also validates the message integrity as seen in the following figure. The figure contains the following notes:
+
+1. The message was received from identity locally called Alice.
+
+2. The encryption-key and the signing-key fingerprint is displayed.
+
+3. The note sender is trusted.
+
+4. The note is digitally signed and the signature is valid.
+
 ![B07](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S13_B07_decrypted_node_trusted_sender.png)
+
+For advanced developers the example applications also contain a debug section as seen in the following figure. The debug section can be used to inspect cryptography keys, the received notes, and perform different cryptographic operations manually. The figure contains the following notes:
+
+1. The debug section is accessible from the main navigator.
+
+2. The key storage contains the CryptoKey objects that have been stored in the local indexed database.
+
+3. The note storage contains the messages that are found with the actived identity (2.).
+
+4. The input panel displays the input data for cryptographic operation. The input panel can also be used to input data manually.
+
+5. The output panel displays the output data from cryptograhical operation.
+
+6. The actions contain the following operations that can be performed: encrypt, de-crypt, sign, verify, digest, generateIdentity, importIdentity, exportKey and export Identity.
+
+7. The console view shows the output from the operations.
+
 ![DebugMode](https://raw.githubusercontent.com/Fincodr/WebCryptoAPI/master/images/S14_debug.png)
