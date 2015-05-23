@@ -8,8 +8,8 @@
 
   // config module
   app.config = {
-    useServerBackend: false,
-    remoteAddress: 'https://localhost'
+    useServerBackend: false,			// Use server backend (true) or local storage (false) ?
+    remoteAddress: 'https://localhost'	// Backend address
   };
 
 })(this); // this = window
