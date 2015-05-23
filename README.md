@@ -1,0 +1,1 @@
+# secretnote (standalone) version
