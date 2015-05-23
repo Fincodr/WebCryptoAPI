@@ -33,10 +33,17 @@ app.config = {
 
 The SecretNotes application can be run in standalone mode.
 
+Directly from GitHub:
+https://webcryptoapiex.github.io/secretnote/
+
+Or from your own computer by using node to server the application from localhost:
+
 ```
 $ cd server
-$ node server.js
+$ sudo node server.js
 ```
+
+Open up the application from https://localhost/
 
 ## Mongo backend version
 
@@ -47,7 +54,7 @@ Prerequisites:
 
 ```
 $ cd server
-$ node noteserver.js
+$ sudo node noteserver.js
 ```
 
 
